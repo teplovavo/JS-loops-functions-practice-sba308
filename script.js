@@ -122,8 +122,17 @@ const CourseInfo = {
 
 //If an AssignmentGroup does not belong to its course
 function GroupBelongsToCourse (CourseInfo, AssignmentGroup) {
-    return CourseInfo.id === AssignmentGroup.course_id;
+    if (CourseInfo.id !== AssignmentGroup.course_id) {
+        throw new error ("Error: This assignment Group does NOT belong to the Course!");
+    }
+    return true; // if the group belongs to the course
 }
-console.log("Is this group belongs to course? - ", GroupBelongsToCourse (CourseInfo, AssignmentGroup));
+try {
+    const groupValidationResult = GroupBelongsToCourse(CourseInfo, AssignmentGroup);
+    console.log("Does this group belongs to course? - ", groupValidationResult);
+} catch (error) {
+    console.error(error.message);
+}
+
 
 
