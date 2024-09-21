@@ -10,13 +10,13 @@ const CourseInfo = {
   const AssignmentGroup = {
     id: 12345,
     name: "Fundamentals of JavaScript",
-    course_id: 451,   // the ID of the course the assignment group belongs to
-    group_weight: 25,    // the percentage weight of the entire assignment group
+    course_id: 451,   
+    group_weight: 25,    // percentage 
     assignments: [
       {
         id: 1,
         name: "Declare a Variable",
-        due_at: "2023-01-25",   // the due date for the assignment
+        due_at: "2023-01-25",  
         points_possible: 50    // the maximum points possible for the assignment
       },
       {
@@ -78,47 +78,9 @@ const CourseInfo = {
     }
   ];
   
-  function getLearnerData(course, ag, submissions) {
-    // here, we would process this data to achieve the desired result.
-    const result = [
-      {
-        id: 125,
-        avg: 0.985, // (47 + 150) / (50 + 150)
-        1: 0.94, // 47 / 50
-        2: 1.0 // 150 / 150
-      },
-      {
-        id: 132,
-        avg: 0.82, // (39 + 125) / (50 + 150)
-        1: 0.78, // 39 / 50
-        2: 0.833 // late: (140 - 15) / 150
-      }
-    ];
-  
-    return result;
-  }
-  
-  const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
-  
-  console.log(result);
 
 
-  //Your goal is to analyze and transform this data such that the output of your program is an array of objects, each containing the following information in the following format:
-    // the ID of the learner for which this data has been collected
-    //id number,
-    // the learner’s total, weighted average, in which assignments
-    // with more points_possible should be counted for more
-    // e.g. a learner with 50/100 on one assignment and 190/200 on another
-    // would have a weighted average score of 240/300 = 80%.
-    //avg number,
-    // each assignment should have a key with its ID,
-    // and the value associated with it should be the percentage that
-    // the learner scored on the assignment (submission.score / points_possible)
-   // assignment_id number 
-    // if an assignment is not yet due, it should not be included in either
-    // the average or the keyed dictionary of scores
-
-////////////////////////////////////////MY CODE///////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
 //If an AssignmentGroup does not belong to its course
 function GroupBelongsToCourse (CourseInfo, AssignmentGroup) {
@@ -133,6 +95,7 @@ try {
 } catch (Error) {
     console.error(Error.message);
 }
+
 
 // Check if a learner's submission is valid.
 function validSubmission(submission, assignment) {
@@ -149,5 +112,68 @@ function validateSubmissions(submissions, assignments) {
     });
 }
 validateSubmissions(LearnerSubmissions, AssignmentGroup.assignments);
+
+
+
+
+function getLearnerData(course, ag, submissions) {
+    const result = [];  //empty array to store data
+
+    ag.assignments.forEach(assignment => {
+        try {
+            const dueDate = new Date(assignment.due_at);  // Convert to object
+
+
+            // Check if points valid 
+            if (assignment.points_possible <= 0) {
+                throw new Error(`Assignment ${assignment.id} has invalid points_possible: ${assignment.points_possible}`);
+            }
+
+            // Process each submission for the current assignment
+            submissions.forEach(submission => {
+                try {
+                    // Check -submission belongs to the assignment
+                    if (submission.assignment_id === assignment.id) {
+
+                        // Find learner 
+                        let learner = result.find(l => l.id === submission.learner_id);
+
+                        // If the learner doesnt exist - create a new object
+                        if (!learner) {
+                            learner = { id: submission.learner_id, avg: 0, totalPoints: 0, totalPossible: 0 };
+                            result.push(learner);
+                        }
+
+                        const submittedDate = new Date(submission.submission.submitted_at);  // Convert submission!! date to object
+                        let score = submission.submission.score;  // Get the score for this submission
+
+                        // Check if the submission was late... comparing dates!
+                        const isLate = submittedDate > dueDate;
+
+                        // If late, -10%
+                        if (isLate) {
+                            score *= 0.9;
+                            console.log(`Late submission ${submission.learner_id} on assignment ${assignment.id}: Score adjusted to ${score}`);
+                        }
+
+                        // % learner score
+                        const percentage = score / assignment.points_possible;
+                        console.log(`Learner ${submission.learner_id} scored ${percentage * 100}% on assignment ${assignment.id}`);
+
+                        // Store the percentage score in the object..
+                        learner[assignment.id] = percentage;
+
+                        // Update points
+                        learner.totalPoints += score;
+                        learner.totalPossible += assignment.points_possible;
+                    }
+                } catch (error) {
+                    console.error(`Error processing submission for learner ${submission.learner_id} on assignment ${assignment.id}:`, error.message);
+                }
+            });
+        } catch (error) {
+            console.error(`Error processing assignment ${assignment.id}:`, error.message);
+        }
+    });}
 
 
