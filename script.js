@@ -123,16 +123,31 @@ const CourseInfo = {
 //If an AssignmentGroup does not belong to its course
 function GroupBelongsToCourse (CourseInfo, AssignmentGroup) {
     if (CourseInfo.id !== AssignmentGroup.course_id) {
-        throw new error ("Error: This assignment Group does NOT belong to the Course!");
+        throw new Error ("Error: This assignment Group does NOT belong to the Course!");
     }
     return true; // if the group belongs to the course
 }
 try {
     const groupValidationResult = GroupBelongsToCourse(CourseInfo, AssignmentGroup);
     console.log("Does this group belongs to course? - ", groupValidationResult);
-} catch (error) {
-    console.error(error.message);
+} catch (Error) {
+    console.error(Error.message);
 }
 
+// Check if a learner's submission is valid.
+function validSubmission(submission, assignment) {
+    const finalScore = submission.submission.score;
+    const pointsPossible = assignment.points_possible;
+ const isValid = pointsPossible > 0 && typeof finalScore === "number" && !isNaN(finalScore);
+ return isValid; 
+}
+function validateSubmissions(submissions, assignments) {
+    submissions.forEach(submission => {
+        const assignment = assignments.find(a => a.id === submission.assignment_id);
+        const isValid = validSubmission(submission, assignment);
+        console.log(`Submission for learner ${submission.learner_id} on assignment ${submission.assignment_id} is ${isValid ? 'valid' : 'not valid'}.`);
+    });
+}
+validateSubmissions(LearnerSubmissions, AssignmentGroup.assignments);
 
 
