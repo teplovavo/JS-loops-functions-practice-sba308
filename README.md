@@ -14,3 +14,8 @@ After that, I calculated the percentage of the score for each assignment and sto
 
 I converted data in object, checked the current date. Skipped future assignments.
 Checked if points valid, throw an error if not. Catched error.
+
+I processed submissions: If the learner doesn't exist in the result, create a new object. Got the score from the submission.
+Calculated penalties for late submissions 10%. Calculated the percentage score for the assignment. Then Updated the total points and possible points for calculating the learner's weighted average.
+After that catched errors.
+
