@@ -11,3 +11,6 @@ Next, I processed each assignment. I converted the due date to a Date object so 
 For each submission, I made sure it belongs to the right assignment, and then I checked if the learner is already in the result. If they aren’t, I create a new object for that learner. I also converted the submission date to a Date object and checked if the submission was late. If it was late, I deducted 10% from the score.
 
 After that, I calculated the percentage of the score for each assignment and stored it in the learner’s data. I also updated the learner’s total points and possible points to use them later for calculating their average.
+
+I converted data in object, checked the current date. Skipped future assignments.
+Checked if points valid, throw an error if not. Catched error.
