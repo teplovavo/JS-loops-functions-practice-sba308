@@ -188,3 +188,24 @@ function getLearnerData(course, ag, submissions) {
 
 
     });
+
+     // Calculate the weighted average for each learner
+     result.forEach(learner => {
+        try {
+            // Ensure total possible points is greater than 0 
+            if (learner.totalPossible > 0) {
+                // Calculate the average by dividing the total points by the total possible points
+                learner.avg = learner.totalPoints / learner.totalPossible;
+            } else {
+                // If there are no possible points, log an error
+                throw new Error(`Total points for learner ${learner.id} is 0, cannot calculate average`);
+            }
+            console.log(`Learner ${learner.id} - Weighted Average Score: ${(learner.avg * 100).toFixed(2)}%`);
+        } catch (error) {
+            // Catch errors 
+            console.error(`Error calculating average for learner ${learner.id}:`, error.message);
+        }
+    });
+
+    return result;  // Return the final array of learner data
+}
