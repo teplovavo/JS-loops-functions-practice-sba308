@@ -209,3 +209,7 @@ function getLearnerData(course, ag, submissions) {
 
     return result;  // Return the final array of learner data
 }
+
+// Call the function and log the final result
+const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
+console.log("Final result:", result);  // Log the final processed learner data
