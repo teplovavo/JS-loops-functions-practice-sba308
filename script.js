@@ -78,16 +78,14 @@ const LearnerSubmissions = [
     }
 ];
 
-
-
 //////////////////////////////////////////////////////////////////////////
 
-//If an AssignmentGroup does not belong to its course
+// Check if an AssignmentGroup belongs to its course
 function GroupBelongsToCourse(CourseInfo, AssignmentGroup) {
     if (CourseInfo.id !== AssignmentGroup.course_id) {
         throw new Error("Error: This assignment Group does NOT belong to the Course!");
     }
-    return true; // if the group belongs to the course
+    return true;
 }
 try {
     const groupValidationResult = GroupBelongsToCourse(CourseInfo, AssignmentGroup);
@@ -96,49 +94,97 @@ try {
     console.error(Error.message);
 }
 
-
-// Check if a learner's submission is valid.
+// Check if a learner's submission is valid
 function validSubmission(submission, assignment) {
-    const finalScore = submission.score;
-    const pointsPossible = assignment.points_possible;
+    const finalScore = submission.submission.score;  // Get the score the learner received
+    const pointsPossible = assignment.points_possible;  // Get the possible points for the assignment
+
+    // Check if the score is a valid number and if the possible points are greater than 0
     const isValid = pointsPossible > 0 && typeof finalScore === "number" && !isNaN(finalScore);
-    return isValid;
+    return isValid;  // Return whether the submission is valid
 }
+
+// Validate submissions
+// This function goes through each learner submission and validates it. based on possible points
 function validateSubmissions(submissions, assignments) {
     submissions.forEach(submission => {
-        const assignment = assignments.find(a => a.id === submission.assignment_id);
-        const isValid = validSubmission(submission, assignment);
+        const assignment = assignments.find(a => a.id === submission.assignment_id);  // Find the corresponding assignment
+        const isValid = validSubmission(submission, assignment);  // Validate the submission
         console.log(`Submission for learner ${submission.learner_id} on assignment ${submission.assignment_id} is ${isValid ? 'valid' : 'not valid'}.`);
     });
 }
+
+// Validate all the learner submissions for the provided assignments
 validateSubmissions(LearnerSubmissions, AssignmentGroup.assignments);
 
+//////////////////////////////////////////////////////////////////////////
 
 
-
-
+// Process and calculate learner data
 function getLearnerData(course, ag, submissions) {
-    const result = [];  //empty array to store data
+    const result = [];  // Initialize an empty array to store learner results
 
     ag.assignments.forEach(assignment => {
         try {
-            const dueDate = new Date(assignment.due_at);  // Convert to Date object
-            const today = new Date();  // Get the current date
+            const dueDate = new Date(assignment.due_at);  //Convert due date to object
+            const today = new Date();  //current date
 
-            // Skip future assignments (if due date is after today)
+            // Skip future assignments
+            // If the assignment due date is in the future we skip processing it
             if (dueDate > today) {
                 console.log(`Skipping future assignment: ${assignment.name} (due at ${assignment.due_at})`);
-                return;  // Continue to the next assignment
+                return;
             }
 
-            // Check if points valid 
-            if (assignment.points_possible <= 0) {
-                throw new Error(`Assignment ${assignment.id} has invalid points_possible: ${assignment.points_possible}`);
-            }
+
+            // Process each submission for the current assignment
+            submissions.forEach(submission => {
+                try {
+                    if (submission.assignment_id === assignment.id) {
+                        
+                        let learner = result.find(l => l.id === submission.learner_id);// Check if the learner is already in the result array
+
+                        // If the learner doesn't exist in the result, create a new object 
+                        if (!learner) {
+                            learner = { id: submission.learner_id, avg: 0, totalPoints: 0, totalPossible: 0 };
+                            result.push(learner);
+                        }
+
+                        const submittedDate = new Date(submission.submission.submitted_at);  // Convert the submission date to object
+                        let score = submission.submission.score;  // Get the score from the submission
+
+                        //late penalty 10%
+                        const isLate = submittedDate > dueDate;
+                        if (isLate) {
+                            score *= 0.9;  
+                            console.log(`Late submission ${submission.learner_id} on assignment ${assignment.id}: Score adjusted to ${score}`);
+                        }
+
+                        // Calculate the percentage score for the assignment
+                        const percentage = score / assignment.points_possible;
+                        console.log(`Learner ${submission.learner_id} scored ${percentage * 100}% on assignment ${assignment.id}`);
+
+                       
+                        learner[assignment.id] = percentage; // Store the percentage score in the learner's result object
+
+                        // Update the total points and possible points for calculating the learner's weighted average
+                        learner.totalPoints += score;
+                        learner.totalPossible += assignment.points_possible;
+                    }
+
+
+                } catch (error) {
+                    // Catch errors
+                    console.error(`Error processing submission for learner ${submission.learner_id} on assignment ${assignment.id}:`, error.message);
+                }
+
+            });
 
 
         } catch (error) {
+            // Catch errors during assignment processing
             console.error(`Error processing assignment ${assignment.id}:`, error.message);
         }
+
+
     });
-}
