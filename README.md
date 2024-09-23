@@ -22,3 +22,5 @@ After that catched errors.
 I Calculated the weighted average for each learner. Ensured total possible points is greater than 0. Then I calculated the average by dividing the total points by the total possible points.
 After that i throw an error. Catched errors too. Returned the result.
 
+Called the function and log the final result. Checked all the code, checked concole fo rthe results. 
+
